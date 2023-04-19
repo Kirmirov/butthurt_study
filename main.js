@@ -1,29 +1,36 @@
-// Задание 1
-// Описание: Написать функцию sum, которая может быть исполнена любое количество раз с не undefined аргументом. 
-// Если она исполнена без аргументов, то возвращает значение суммы всех переданных до этого значений. 
-// sum(1)(2)(3)....(n)() === 1 + 2 + 3 + ... + n
-
-
-// Решение:
-let sum = function (a) {
-	return function (b) {
-		if (b) {
-		  	return sum(a + b);
-		}
-		return a; 
-	};
+var fn1 = () => {
+	console.log('fn1');
+	return Promise.resolve(1);
 };
+var fn2 = () => new Promise(resolve => {
+	console.log('fn2');
+	setTimeout(() => resolve(2), 1000);
+});
 
-console.log(sum(2)(3)());
+function promiseReduce(asyncFunctions, reduce, initialValue)
+{
+	let pChain = Promise.resolve(); // создаем новый пустой промис
 
-// Объяснение:
-// Первый вызов sum в которую передали 2, вернул нам безымянную функцию, которую мы вызвали и в которую передали 3.
-// Т.к 3 не false безымянная функция вернула нам вызов sum в которую мы передали 2ку, из вызова sum, и 3ку из вызова безымянной функции.
-// В ответ sum вернула безыменняю функцию, которую мы вызвали не передав аргумента.
-// T.к. пришел false безымянная функция вернула нам a.
-// Переменная а существует в лексическом окружении функции sum и на момент последнего вызова безымянной функции равна 5.
+	for (const pFunc of asyncFunctions) // проходимся циклом по массиву функций
+	{
+		pChain = pChain
+					.then(() => { return pFunc(); }) 
+					// результатом вызова pFunc будет промис с значением которое мы возвращаем
+					.then((nFuncResult) => { return reduce(nFuncResult, initialValue); });
+					// возвращенное значение передаем в reduce в качестве аргумента и возвращаем полученный результат
 
-// Фактически мы можем отойти от каррирования и разложить вызовы по переменным:
-let noNameFun 	= sum(2);
-let sumCall 	= noNameFun(3);
-console.log(sumCall());
+		// поскольку pChain перезаписывается каждый раз то последним переданным результатом будет 2
+	}
+
+	return pChain;
+}
+
+promiseReduce(
+	[fn1, fn2],
+	function (memo, value) {
+		console.log('reduce');
+		return memo * value;
+	},
+	1
+	)
+	.then(console.log); // promiseReduce вернула последний промис с результатом 2
