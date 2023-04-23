@@ -1,36 +1,44 @@
-var fn1 = () => {
-	console.log('fn1');
-	return Promise.resolve(1);
-};
-var fn2 = () => new Promise(resolve => {
-	console.log('fn2');
-	setTimeout(() => resolve(2), 1000);
-});
+/**
+ * Задание:
+ * Написать алгоритм и функцию getPath(), находяющую уникальный css-селектор для элемента в документе.
+ * Уникальный селектор может быть использован document.querySelector() и возвращать исходный элемент.
+ * Так чтобы document.querySelectorAll(), вызванный с этим селектором, 
+ * не должен находить никаких элементов, кроме исходного.
+ */
 
-function promiseReduce(asyncFunctions, reduce, initialValue)
+let pHTMLElement = document.querySelector('#radio1');
+
+function getPath(a_pHTMLElement)
 {
-	let pChain = Promise.resolve(); // создаем новый пустой промис
+	if (a_pHTMLElement === null || a_pHTMLElement.tagName === 'HTML')
+		return '';
 
-	for (const pFunc of asyncFunctions) // проходимся циклом по массиву функций
+	const MAIN_PARENT_TAG 			= 'body';
+	let strCurrentElementTagName 	= a_pHTMLElement.tagName.toLowerCase();
+
+	if (strCurrentElementTagName !== MAIN_PARENT_TAG)
 	{
-		pChain = pChain
-					.then(() => { return pFunc(); }) 
-					// результатом вызова pFunc будет промис с значением которое мы возвращаем
-					.then((nFuncResult) => { return reduce(nFuncResult, initialValue); });
-					// возвращенное значение передаем в reduce в качестве аргумента и возвращаем полученный результат
-
-		// поскольку pChain перезаписывается каждый раз то последним переданным результатом будет 2
+		// Получаем родительский элемент текущего элемента:
+		let pCurrentElementParent 		= a_pHTMLElement.parentNode;
+		// Получаем массив дочерних элементов у родительского элемента:
+		let aCurrentParentsChildrens 	= Array.from(pCurrentElementParent.children);
+		// Проверяем содержит ли родительский элемент дочерние элементы с тегом как у текущего:
+		if (aCurrentParentsChildrens.filter(pChildrenElement => 
+			pChildrenElement.tagName.toLowerCase() === strCurrentElementTagName).length > 1)
+		{
+			// Находим индекс текущего элемента в массиве дочерних элементов у родительского элемента:
+			let nCurrentElementIndex 	= aCurrentParentsChildrens.indexOf(a_pHTMLElement);
+			// Перевызываем функцию и передаем в нее родительский элемент текуещго элемента:
+			return getPath(pCurrentElementParent) + 
+				` ${strCurrentElementTagName}:nth-child(${nCurrentElementIndex + 1})`;
+		}
+		else 
+			return getPath(pCurrentElementParent) + ` ${strCurrentElementTagName}`;
 	}
-
-	return pChain;
+	else
+		return 'body';
 }
 
-promiseReduce(
-	[fn1, fn2],
-	function (memo, value) {
-		console.log('reduce');
-		return memo * value;
-	},
-	1
-	)
-	.then(console.log); // promiseReduce вернула последний промис с результатом 2
+console.log(getPath(pHTMLElement));
+
+module.exports = getPath;
