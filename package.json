@@ -1,0 +1,23 @@
+{
+  "name": "otus",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "test": "jest --env=jsdom"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Kirmirov/butthurt_study.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Kirmirov/butthurt_study/issues"
+  },
+  "homepage": "https://github.com/Kirmirov/butthurt_study#readme",
+  "devDependencies": {
+    "jest": "^29.5.0",
+    "jest-environment-jsdom": "^29.5.0"
+  }
+}
