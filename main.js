@@ -22,18 +22,11 @@ function getPath(a_pHTMLElement)
 		let pCurrentElementParent 		= a_pHTMLElement.parentNode;
 		// Получаем массив дочерних элементов у родительского элемента:
 		let aCurrentParentsChildrens 	= Array.from(pCurrentElementParent.children);
-		// Проверяем содержит ли родительский элемент дочерние элементы с тегом как у текущего:
-		if (aCurrentParentsChildrens.filter(pChildrenElement => 
-			pChildrenElement.tagName.toLowerCase() === strCurrentElementTagName).length > 1)
-		{
-			// Находим индекс текущего элемента в массиве дочерних элементов у родительского элемента:
-			let nCurrentElementIndex 	= aCurrentParentsChildrens.indexOf(a_pHTMLElement);
-			// Перевызываем функцию и передаем в нее родительский элемент текуещго элемента:
-			return getPath(pCurrentElementParent) + 
-				` ${strCurrentElementTagName}:nth-child(${nCurrentElementIndex + 1})`;
-		}
-		else 
-			return getPath(pCurrentElementParent) + ` ${strCurrentElementTagName}`;
+		// Находим индекс текущего элемента в массиве дочерних элементов у родительского элемента:
+		let nCurrentElementIndex 	= aCurrentParentsChildrens.indexOf(a_pHTMLElement);
+		// Перевызываем функцию и передаем в нее родительский элемент текущего элемента:
+		return getPath(pCurrentElementParent) + 
+			` ${strCurrentElementTagName}:nth-child(${nCurrentElementIndex + 1})`;
 	}
 	else
 		return 'body';

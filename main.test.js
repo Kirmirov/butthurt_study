@@ -41,7 +41,7 @@ describe('getPath', () => {
 		`;
 		const pElement 	= pContainer.querySelector('p');
 		const strPath 		= getPath(pElement);
-		expect(strPath).toBe('body div p');
+		expect(strPath).toBe('body div:nth-child(1) p:nth-child(1)');
 	});
 	
 	test('Функция должена возвращать правильный путь для элемента с сиблингами с тем же тегом', () => {
@@ -56,7 +56,7 @@ describe('getPath', () => {
 		`;
 		const pElement 	= pContainer.querySelector('p:nth-child(2)');
 		const strPath 		= getPath(pElement);
-		expect(strPath).toBe('body div p:nth-child(2)');
+		expect(strPath).toBe('body div:nth-child(1) p:nth-child(2)');
 	});
 	
 	test('Функция должена возвращать правильный путь для элемента внутри вложенных элементов', () => {
@@ -73,7 +73,7 @@ describe('getPath', () => {
 		`;
 		const pElement = pContainer.querySelector('h1');
 		const strPath 		= getPath(pElement);
-		expect(strPath).toBe('body div section article h1');
+		expect(strPath).toBe('body div:nth-child(1) section:nth-child(1) article:nth-child(1) h1:nth-child(1)');
 	});
 
 	test('Функция должена возвращать правильный путь для элемента по id', () => {
@@ -90,7 +90,7 @@ describe('getPath', () => {
 		`;
 		const pElement = pContainer.querySelector('#title');
 		const strPath 		= getPath(pElement);
-		expect(strPath).toBe('body section div h3:nth-child(2)');
+		expect(strPath).toBe('body section:nth-child(1) div:nth-child(1) h3:nth-child(2)');
 	});
 
 	test('Функция должена возвращать правильный путь для элемента по class', () => {
@@ -107,7 +107,7 @@ describe('getPath', () => {
 		`;
 		const pElement = pContainer.querySelector('.title');
 		const strPath 		= getPath(pElement);
-		expect(strPath).toBe('body section div h3:nth-child(2)');
+		expect(strPath).toBe('body section:nth-child(1) div:nth-child(1) h3:nth-child(2)');
 	});
 
 	test('Селектор, возвращаемый функцией, должен быть уникальным для элемента', () => {
@@ -144,7 +144,7 @@ describe('getPath', () => {
 		`;
 		const aElement = pContainer.querySelector('a');
 		const strPath = getPath(aElement);
-		expect(strPath).toBe('body header nav ul li a');
+		expect(strPath).toBe('body header:nth-child(1) nav:nth-child(1) ul:nth-child(1) li:nth-child(1) a:nth-child(1)');
 	});
 
 	test('Функция должена возвращать пустую строку для несуществующего элемента', () => {
@@ -162,6 +162,6 @@ describe('getPath', () => {
 		`;
 		const pButtonElement = pContainer.querySelector('#button-2');
 		const strPath = getPath(pButtonElement);
-		expect(strPath).toBe('body div button:nth-child(2)');
+		expect(strPath).toBe('body div:nth-child(1) button:nth-child(2)');
 	});
 });
