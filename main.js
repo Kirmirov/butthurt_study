@@ -1,37 +1,41 @@
 /**
  * Задание:
- * Написать алгоритм и функцию getPath(), находяющую уникальный css-селектор для элемента в документе.
- * Уникальный селектор может быть использован document.querySelector() и возвращать исходный элемент.
- * Так чтобы document.querySelectorAll(), вызванный с этим селектором, 
- * не должен находить никаких элементов, кроме исходного.
+ * Написать NodeJS скрипт tree для вывода списка файлов и папок файловой системы.
+ * Результатом работы должен быть объект с массивами { files, folders }.
+ * Вызовы файловой системы должны быть асинхронными. Скрипт принимает входной параметр - путь до папки.
+ * Добавить возможность выполнять этот скрипт через команду npm run tree -- path.
  */
 
-let pHTMLElement = document.querySelector('#radio1');
+import path from 'path';
+import fs from 'fs/promises';
 
-function getPath(a_pHTMLElement)
-{
-	if (a_pHTMLElement === null || a_pHTMLElement.tagName === 'HTML')
-		return '';
+// Получение пути из агрумента переданного после команды tree -- 
+const PATH_END = process.argv[2];
 
-	const MAIN_PARENT_TAG 			= 'body';
-	let strCurrentElementTagName 	= a_pHTMLElement.tagName.toLowerCase();
+async function getTree(a_strPath) 
+{  
+	const TREE 			= { files: [], dirs: [] };
+	const DIRECTORY  	= path.dirname(a_strPath);
 
-	if (strCurrentElementTagName !== MAIN_PARENT_TAG)
+	async function walk(a_strCurentPath)
 	{
-		// Получаем родительский элемент текущего элемента:
-		let pCurrentElementParent 		= a_pHTMLElement.parentNode;
-		// Получаем массив дочерних элементов у родительского элемента:
-		let aCurrentParentsChildrens 	= Array.from(pCurrentElementParent.children);
-		// Находим индекс текущего элемента в массиве дочерних элементов у родительского элемента:
-		let nCurrentElementIndex 	= aCurrentParentsChildrens.indexOf(a_pHTMLElement);
-		// Перевызываем функцию и передаем в нее родительский элемент текущего элемента:
-		return getPath(pCurrentElementParent) + 
-			` ${strCurrentElementTagName}:nth-child(${nCurrentElementIndex + 1})`;
+		// Проверка является ли файл папкой:
+		if ((await fs.stat(a_strCurentPath)).isDirectory())
+		{
+			// Записываем путь к папке:
+			TREE.dirs.push(path.relative(DIRECTORY, a_strCurentPath).replace(/\\/g, '/'));
+			// Получим ее содержимое:
+			let aDirectoryContent = await fs.readdir(a_strCurentPath);
+			// Проходимся по содержимому папки:
+			for (const strFileName of aDirectoryContent)
+				await walk(path.join(a_strCurentPath, strFileName));
+		}
+		else
+			TREE.files.push(path.relative(DIRECTORY, a_strCurentPath).replace(/\\/g, '/'));
 	}
-	else
-		return 'body';
+
+	await walk(a_strPath);
+	console.log(TREE);
 }
 
-console.log(getPath(pHTMLElement));
-
-module.exports = getPath;
+getTree(PATH_END);
