@@ -8,34 +8,43 @@
 
 import path from 'path';
 import fs from 'fs/promises';
+import createFile from './createFile.js';
+// import splitAndSort from './splitAndSort.js';
+
+
+
+createFile('./files/test.txt', 10485760);
+// splitAndSort('./files/test.txt', 5000);
+
+
 
 // Получение пути из агрумента переданного после команды tree -- 
-const PATH_END = process.argv[2];
+// const PATH_END = process.argv[2];
 
-async function getTree(a_strPath) 
-{  
-	const TREE 			= { files: [], dirs: [] };
-	const DIRECTORY  	= path.dirname(a_strPath);
+// async function getTree(a_strPath) 
+// {  
+// 	const TREE 			= { files: [], dirs: [] };
+// 	const DIRECTORY  	= path.dirname(a_strPath);
 
-	async function walk(a_strCurentPath)
-	{
-		// Проверка является ли файл папкой:
-		if ((await fs.stat(a_strCurentPath)).isDirectory())
-		{
-			// Записываем путь к папке:
-			TREE.dirs.push(path.relative(DIRECTORY, a_strCurentPath).replace(/\\/g, '/'));
-			// Получим ее содержимое:
-			let aDirectoryContent = await fs.readdir(a_strCurentPath);
-			// Проходимся по содержимому папки:
-			for (const strFileName of aDirectoryContent)
-				await walk(path.join(a_strCurentPath, strFileName));
-		}
-		else
-			TREE.files.push(path.relative(DIRECTORY, a_strCurentPath).replace(/\\/g, '/'));
-	}
+// 	async function walk(a_strCurentPath)
+// 	{
+// 		// Проверка является ли файл папкой:
+// 		if ((await fs.stat(a_strCurentPath)).isDirectory())
+// 		{
+// 			// Записываем путь к папке:
+// 			TREE.dirs.push(path.relative(DIRECTORY, a_strCurentPath).replace(/\\/g, '/'));
+// 			// Получим ее содержимое:
+// 			let aDirectoryContent = await fs.readdir(a_strCurentPath);
+// 			// Проходимся по содержимому папки:
+// 			for (const strFileName of aDirectoryContent)
+// 				await walk(path.join(a_strCurentPath, strFileName));
+// 		}
+// 		else
+// 			TREE.files.push(path.relative(DIRECTORY, a_strCurentPath).replace(/\\/g, '/'));
+// 	}
 
-	await walk(a_strPath);
-	console.log(TREE);
-}
+// 	await walk(a_strPath);
+// 	console.log(TREE);
+// }
 
-getTree(PATH_END);
+// getTree(PATH_END);
