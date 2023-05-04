@@ -5,7 +5,7 @@
   "description": "",
   "main": "main.js",
   "scripts": {
-    "test": "jest --env=jsdom",
+    "test": "jest",
 	"tree": "node ./main.js"
   },
   "repository": {

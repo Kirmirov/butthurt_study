@@ -6,8 +6,8 @@
  * Добавить возможность выполнять этот скрипт через команду npm run tree -- path.
  */
 
-import path from 'path';
-import fs from 'fs/promises';
+const fs = require('fs/promises');
+const path = require('path');
 
 // Получение пути из агрумента переданного после команды tree -- 
 const PATH_END = process.argv[2];
@@ -35,7 +35,9 @@ async function getTree(a_strPath)
 	}
 
 	await walk(a_strPath);
-	console.log(TREE);
+	return TREE;
 }
 
 getTree(PATH_END);
+
+module.exports = getTree;
