@@ -14,30 +14,25 @@ describe('getTree', () => {
 				'f2.txt': 'f2 content',
 			},
 		};
-
-		jest.mock('fs', () => {
-			return {
-				promises: {
-					readdir: jest.fn(),
-					stat: jest.fn(),
-				},
-			};
-		});
-
-		fs.readdir.mockImplementation((path) => {
-			const result = Object.keys(mockFileSystem[path]);
-			return Promise.resolve(result);
-		});
-
-		fs.stat.mockImplementation((path) => {
-			const isFile = typeof mockFileSystem[path] === 'string';
-			return Promise.resolve({
-				isFile: () => isFile,
-				isDirectory: () => !isFile,
-			});
-		});
 	});
 
-	test('Функция должна возвращать объект с массивами', )
+	test('Функция должна возвращать объект с массивами', async () => {
+
+		const result = {
+			files: [
+				"foo/f1.txt",
+				"foo/f2.txt",
+				"foo/bar/bar1.txt",
+				"foo/bar/bar2.txt"
+			],
+			dirs: [
+				"foo",
+				"foo/bar",
+				"foo/bar/baz"
+			]
+		}
+		const tree = await getTree('./foo');
+		expect(tree).toEqual(result);
+	});
 
 });

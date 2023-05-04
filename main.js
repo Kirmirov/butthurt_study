@@ -38,6 +38,4 @@ async function getTree(a_strPath)
 	return TREE;
 }
 
-getTree(PATH_END);
-
 module.exports = getTree;
