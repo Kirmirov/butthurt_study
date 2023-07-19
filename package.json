@@ -1,12 +1,11 @@
 {
   "name": "otus",
   "version": "1.0.0",
-  "type": "module",
   "description": "",
   "main": "main.js",
   "scripts": {
     "test": "jest",
-	"tree": "node ./main.js"
+    "tree": "node ./main.js"
   },
   "repository": {
     "type": "git",
@@ -20,6 +19,8 @@
   "homepage": "https://github.com/Kirmirov/butthurt_study#readme",
   "devDependencies": {
     "jest": "^29.5.0",
-    "jest-environment-jsdom": "^29.5.0"
+    "jest-environment-jsdom": "^29.5.0",
+    "memfs": "^3.5.1",
+    "mock-fs": "^5.2.0"
   }
 }
