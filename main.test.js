@@ -1,14 +1,13 @@
-import fs from 'fs-extra';
-import path from 'path';
-import {describe, test, beforeAll, afterAll, expect} from '@jest/globals';
-import { createFileOfWordsMatch } from './main.js';
+const fs = require('fs-extra');
+const path = require('path');
+const createFileOfWordsMatch = require('./main.js');
 
 describe('createFileOfWordsMatch', () => {
 	let strTestFilePath;
 
 	beforeAll(() => {
 		// Создаем временную директорию для хранения временных файлов
-		fs.ensureDirSync('./test');
+		fs.ensureDirSync('test');
 		// Генерируем временное имя файла
 		strTestFilePath = path.join(__dirname, 'test', 'testFile.txt');
 
@@ -16,21 +15,28 @@ describe('createFileOfWordsMatch', () => {
 
 	afterAll(() => {
 		// Удаляем временные файлы и директорию после завершения тестов
-		fs.removeSync(strTestFilePath);
-		fs.removeSync('./test');
+		fs.removeSync('test');
 	});
 
-	test('Функция должна возвращать массив чисел', async () => {
-		const testData = 'Мама мама мама мыла раму раму';
-		const strExpected = '3 1 2';
+	test('Функция должна создавать файл', async () => {
 		
-		fs.writeFileSync(strTestFilePath, testData, 'utf-8');
-
+		const strTestData 		= 'Мама мама мыла,.. мыла./. @@мыла$ ***раму $$334раму раму рмау раму';
+		const strExpected 		= '[2,3,4,1]';
+		// записываем данные в тестовый файл
+		await fs.outputFile(strTestFilePath, strTestData);
+		// читаем данные из тестового файла и создаем новый файл
 		await createFileOfWordsMatch(strTestFilePath);
 
-		let strFileContent = fs.readFileSync(tempFilePath, 'utf-8');
+		const resultFilePath = path.join(__dirname, 'test', 'wordsmatches.txt');
 
-		expect(strFileContent).toEqual(strExpected);
+		const strFileContent = await fs.readFile(resultFilePath, 'utf-8');
+
+		expect(strExpected).toBe(strFileContent);
+
 	});
+
+	
+
+
 });
 

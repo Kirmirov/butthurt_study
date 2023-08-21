@@ -9,9 +9,11 @@
  * 5. Вывести результирующий вектор в файл.
  */
 
-import fs from 'fs';
+const fs 			= require('fs');
+const { Transform } = require('stream');
+const path 			= require('path');
 
-export const createFileOfWordsMatch = (a_strFilePath) => {
+const createFileOfWordsMatch = (a_strFilePath) => {
 
 	const getWordsArray = (a_strDataChunk) => {
 		const wordRegex = /[a-zA-Zа-яА-Я]+/g;
@@ -19,8 +21,7 @@ export const createFileOfWordsMatch = (a_strFilePath) => {
 	};
 
 	const sortAlphabetically = (a_aWords) => {
-		return a_aWords
-						.map(strWord => strWord.toLowerCase())
+		return a_aWords.map(strWord => strWord.toLowerCase())
 						.sort((a, b) => a.localeCompare(b));
 	};
 
@@ -35,26 +36,26 @@ export const createFileOfWordsMatch = (a_strFilePath) => {
 		}, []);
 	};
 
-	const readableStream 	= fs.createReadStream(a_strFilePath, 'utf-8');
-	const writableStream 	= fs.createWriteStream('wordsmatch.txt');
-	let aWords 				= [];
+	const pReadableStream 	= fs.createReadStream(a_strFilePath, 'utf-8');
+	const strWriteFilePath  = path.join(path.dirname(a_strFilePath), 'wordsmatches.txt');
+	const pWritableStream 	= fs.createWriteStream(strWriteFilePath);
+	const pTransformStream  = new Transform({
+		transform(chunk, encoding, callback) 
+		{
+			let strDataChunk 	= chunk.toString();
+			const aWords 		= getWordsArray(strDataChunk);
+			const aWordsMatches = getWordsMatchesArray(sortAlphabetically(aWords));
+			this.push(`[${aWordsMatches.join(',')}]`);
+			// this.push(`[${aWords.join(',')}]`);
+			callback();
+		}
+	});
+
+	pReadableStream.pipe(pTransformStream).pipe(pWritableStream);
 	
-	readableStream.on('data', (chunk) => {
-		aWords = [...aWords, ...getWordsArray(chunk)];
-	});
-
-	readableStream.on('end', () => {
-		let aWordsMatches;
-		aWordsMatches = getWordsMatchesArray(sortAlphabetically(aWords));
-		writableStream.write(aWordsMatches.join(' '));
-		writableStream.end();
-	});
-
-	writableStream.on('finish', () => {
-		console.log('Запись данных завершена.');
-	});
 }
- 
 
-createFileOfWordsMatch('files/test.txt');
+createFileOfWordsMatch('./files/test.txt');
+
+module.exports = createFileOfWordsMatch;
 
