@@ -1,50 +1,60 @@
 /**
  * Задание:
- * Написать NodeJS скрипт tree для вывода списка файлов и папок файловой системы.
- * Результатом работы должен быть объект с массивами { files, folders }.
- * Вызовы файловой системы должны быть асинхронными. Скрипт принимает входной параметр - путь до папки.
- * Добавить возможность выполнять этот скрипт через команду npm run tree -- path.
+ * Используйте модуль streams для программы простой индексации текста. Она должна:
+ * 1. Читать текстовый файл переданный в аргументах к скрипту
+ * 2. Разделять входные данные на отдельные слова, разделенные разделителем (пробел, символ новой строки)
+ * 3. Фильтровать не-текстовые символы (например, ',')
+ * 4. Индексировать текст в вектор - массив чисел. Позиция в массиве представляет порядок всех входных слов, 
+ * 		отсортированных в алфавитном порядке. Значение - это количество появлений определенного слова в тексте.
+ * 5. Вывести результирующий вектор в файл.
  */
 
-import path from 'path';
-import fs from 'fs/promises';
-import createFile from './createFile.js';
-// import splitAndSort from './splitAndSort.js';
+import fs from 'fs';
 
+export const createFileOfWordsMatch = (a_strFilePath) => {
 
+	const getWordsArray = (a_strDataChunk) => {
+		const wordRegex = /[a-zA-Zа-яА-Я]+/g;
+		return a_strDataChunk.match(wordRegex);
+	};
 
-createFile('./files/test.txt', 10485760);
-// splitAndSort('./files/test.txt', 5000);
+	const sortAlphabetically = (a_aWords) => {
+		return a_aWords
+						.map(strWord => strWord.toLowerCase())
+						.sort((a, b) => a.localeCompare(b));
+	};
 
+	const getWordsMatchesArray = (a_aWords) => {
+		return a_aWords.reduce((aAcc, strWord, nInd, aArray) => {
+			if (nInd === 0 || strWord !== aArray[nInd - 1])
+				aAcc.push(1);
+			else
+				aAcc[aAcc.length - 1]++;
 
+			return aAcc;
+		}, []);
+	};
 
-// Получение пути из агрумента переданного после команды tree -- 
-// const PATH_END = process.argv[2];
+	const readableStream 	= fs.createReadStream(a_strFilePath, 'utf-8');
+	const writableStream 	= fs.createWriteStream('wordsmatch.txt');
+	let aWords 				= [];
+	
+	readableStream.on('data', (chunk) => {
+		aWords = [...aWords, ...getWordsArray(chunk)];
+	});
 
-// async function getTree(a_strPath) 
-// {  
-// 	const TREE 			= { files: [], dirs: [] };
-// 	const DIRECTORY  	= path.dirname(a_strPath);
+	readableStream.on('end', () => {
+		let aWordsMatches;
+		aWordsMatches = getWordsMatchesArray(sortAlphabetically(aWords));
+		writableStream.write(aWordsMatches.join(' '));
+		writableStream.end();
+	});
 
-// 	async function walk(a_strCurentPath)
-// 	{
-// 		// Проверка является ли файл папкой:
-// 		if ((await fs.stat(a_strCurentPath)).isDirectory())
-// 		{
-// 			// Записываем путь к папке:
-// 			TREE.dirs.push(path.relative(DIRECTORY, a_strCurentPath).replace(/\\/g, '/'));
-// 			// Получим ее содержимое:
-// 			let aDirectoryContent = await fs.readdir(a_strCurentPath);
-// 			// Проходимся по содержимому папки:
-// 			for (const strFileName of aDirectoryContent)
-// 				await walk(path.join(a_strCurentPath, strFileName));
-// 		}
-// 		else
-// 			TREE.files.push(path.relative(DIRECTORY, a_strCurentPath).replace(/\\/g, '/'));
-// 	}
+	writableStream.on('finish', () => {
+		console.log('Запись данных завершена.');
+	});
+}
+ 
 
-// 	await walk(a_strPath);
-// 	console.log(TREE);
-// }
+createFileOfWordsMatch('files/test.txt');
 
-// getTree(PATH_END);
