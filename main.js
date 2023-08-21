@@ -13,7 +13,7 @@ const fs 			= require('fs');
 const { Transform } = require('stream');
 const path 			= require('path');
 
-const createFileOfWordsMatch = (a_strFilePath) => {
+const createFileOfWordsMatch = (a_strFilePath, outputPath) => {
 
 	const getWordsArray = (a_strDataChunk) => {
 		const wordRegex = /[a-zA-Zа-яА-Я]+/g;
@@ -37,7 +37,8 @@ const createFileOfWordsMatch = (a_strFilePath) => {
 	};
 
 	const pReadableStream 	= fs.createReadStream(a_strFilePath, 'utf-8');
-	const strWriteFilePath  = path.join(path.dirname(a_strFilePath), 'wordsmatches.txt');
+	const strWriteFilePath  = path.join(outputPath, 'wordsmatches.txt');
+	fs.open(strWriteFilePath, 'w', () =>{});
 	const pWritableStream 	= fs.createWriteStream(strWriteFilePath);
 	const pTransformStream  = new Transform({
 		transform(chunk, encoding, callback) 
@@ -53,7 +54,7 @@ const createFileOfWordsMatch = (a_strFilePath) => {
 	pReadableStream.pipe(pTransformStream).pipe(pWritableStream);
 };
 
-createFileOfWordsMatch('./files/test.txt');
+// createFileOfWordsMatch('./files/test.txt');
 
 module.exports = createFileOfWordsMatch;
 
