@@ -46,14 +46,12 @@ const createFileOfWordsMatch = (a_strFilePath) => {
 			const aWords 		= getWordsArray(strDataChunk);
 			const aWordsMatches = getWordsMatchesArray(sortAlphabetically(aWords));
 			this.push(`[${aWordsMatches.join(',')}]`);
-			// this.push(`[${aWords.join(',')}]`);
 			callback();
 		}
 	});
 
 	pReadableStream.pipe(pTransformStream).pipe(pWritableStream);
-	
-}
+};
 
 createFileOfWordsMatch('./files/test.txt');
 

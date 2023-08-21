@@ -1,42 +1,48 @@
-const fs = require('fs-extra');
-const path = require('path');
+const fs 	= require('fs-extra');
+const mock 	= require('mock-fs');
+const path 	= require('path');
 const createFileOfWordsMatch = require('./main.js');
 
 describe('createFileOfWordsMatch', () => {
-	let strTestFilePath;
+    let virtualDirPath;
+    let virtualFilePath;
 
-	beforeAll(() => {
-		// Создаем временную директорию для хранения временных файлов
-		fs.ensureDirSync('test');
-		// Генерируем временное имя файла
-		strTestFilePath = path.join(__dirname, 'test', 'testFile.txt');
+    beforeAll(() => {
+        const virtualFS = {
+            test: {
+                'testFile.txt': 'initial content'
+            }
+        };
 
-	});
+        mock(virtualFS);
+
+        virtualDirPath = 'test'; // Путь к созданной виртуальной директории
+        virtualFilePath = path.join(virtualDirPath, 'testFile.txt'); // Путь до созданного mock-fs файла
+    });
+
+    test('Тестируемая функция должна создавать файл и записывать в него значения', async () => {
+		// Ожидаемое содержимое
+		const expectedContent 	= '[2,3,4,1]';
+        const contentToWrite 	= 'Мама мама мыла,.. мыла./. @@мыла$ ***раму $$334раму раму рмау раму';
+
+        // Записываем данные в созданный файл в виртуальной директории
+        await fs.writeFileSync(virtualFilePath, contentToWrite);
+
+        // Вызываем тестируемую функцию, передавая путь к созданному файлу
+        await createFileOfWordsMatch(virtualDirPath);
+
+        // Путь к файлу, созданному тестируемой функцией
+        const resultFilePath = path.join(virtualDirPath, 'wordsmatches.txt');
+
+        // Читаем содержимое созданного файла
+        const fileContent = await fs.readFileSync(resultFilePath, 'utf-8');
+
+        // Проверяем, что содержимое совпадает с ожидаемым
+        await expect(fileContent).toBe(expectedContent);
+    });
 
 	afterAll(() => {
-		// Удаляем временные файлы и директорию после завершения тестов
-		fs.removeSync('test');
-	});
-
-	test('Функция должна создавать файл', async () => {
-		
-		const strTestData 		= 'Мама мама мыла,.. мыла./. @@мыла$ ***раму $$334раму раму рмау раму';
-		const strExpected 		= '[2,3,4,1]';
-		// записываем данные в тестовый файл
-		await fs.outputFile(strTestFilePath, strTestData);
-		// читаем данные из тестового файла и создаем новый файл
-		await createFileOfWordsMatch(strTestFilePath);
-
-		const resultFilePath = path.join(__dirname, 'test', 'wordsmatches.txt');
-
-		const strFileContent = await fs.readFile(resultFilePath, 'utf-8');
-
-		expect(strExpected).toBe(strFileContent);
-
-	});
-
-	
-
-
+        mock.restore();
+    });
 });
 
