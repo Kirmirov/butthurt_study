@@ -21,7 +21,10 @@ const createFileOfWordsMatch = (a_strFilePath) => {
 	};
 
 	const sortAlphabetically = (a_aWords) => {
-		return a_aWords.map(strWord => strWord.toLowerCase())
+		if (a_aWords === null)
+			return [];
+		else
+			return a_aWords.map(strWord => strWord.toLowerCase())
 						.sort((a, b) => a.localeCompare(b));
 	};
 
@@ -38,6 +41,8 @@ const createFileOfWordsMatch = (a_strFilePath) => {
 
 	const pReadableStream 	= fs.createReadStream(a_strFilePath, 'utf-8');
 	const strWriteFilePath  = path.join(path.dirname(a_strFilePath), 'wordsmatches.txt');
+	// Создание файла перед открытием потока на запись:
+	fs.open(strWriteFilePath, 'w', () => {});
 	const pWritableStream 	= fs.createWriteStream(strWriteFilePath);
 	const pTransformStream  = new Transform({
 		transform(chunk, encoding, callback) 
@@ -53,7 +58,7 @@ const createFileOfWordsMatch = (a_strFilePath) => {
 	pReadableStream.pipe(pTransformStream).pipe(pWritableStream);
 };
 
-createFileOfWordsMatch('./files/test.txt');
+
 
 module.exports = createFileOfWordsMatch;
 
