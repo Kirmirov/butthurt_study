@@ -9,9 +9,9 @@
  * 5. Вывести результирующий вектор в файл.
  */
 
-const fs 			= require('fs');
-const { Transform } = require('stream');
-const path 			= require('path');
+const fs 			= require('node:fs');
+const { Transform } = require('node:stream');
+const path 			= require('node:path');
 
 const createFileOfWordsMatch = (a_strFilePath) => {
 

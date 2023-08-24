@@ -1,5 +1,5 @@
-const fsp 	= require('fs/promises');
-const fs 	= require('fs');
+const fsp 	= require('node:fs/promises');
+const fs 	= require('node:fs');
 const mock 	= require('mock-fs');
 const createFileOfWordsMatch = require('./main.js');
 
