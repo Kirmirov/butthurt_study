@@ -58,7 +58,4 @@ const createFileOfWordsMatch = (a_strFilePath) => {
 	pReadableStream.pipe(pTransformStream).pipe(pWritableStream);
 };
 
-
-
 module.exports = createFileOfWordsMatch;
-
