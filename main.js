@@ -1,29 +1,74 @@
-// Задание 1
-// Описание: Написать функцию sum, которая может быть исполнена любое количество раз с не undefined аргументом. 
-// Если она исполнена без аргументов, то возвращает значение суммы всех переданных до этого значений. 
-// sum(1)(2)(3)....(n)() === 1 + 2 + 3 + ... + n
+/**
+ * Задание:
+ * Используйте модуль streams для программы простой индексации текста. Она должна:
+ * 1. Читать текстовый файл переданный в аргументах к скрипту
+ * 2. Разделять входные данные на отдельные слова, разделенные разделителем (пробел, символ новой строки)
+ * 3. Фильтровать не-текстовые символы (например, ',')
+ * 4. Индексировать текст в вектор - массив чисел. Позиция в массиве представляет порядок всех входных слов, 
+ * 		отсортированных в алфавитном порядке. Значение - это количество появлений определенного слова в тексте.
+ * 5. Вывести результирующий вектор в файл.
+ */
 
+const fs 			= require('node:fs');
+const { Transform } = require('node:stream');
+const path 			= require('node:path');
 
-// Решение:
-let sum = function (a) {
-	return function (b) {
-		if (b) {
-		  	return sum(a + b);
-		}
-		return a; 
+const createFileOfWordsMatch = (a_strFilePath) => {
+
+	const getWordsArray = (a_strDataChunk) => {
+		const wordRegex = /[a-zA-Zа-яА-Я]+/g;
+		return a_strDataChunk.match(wordRegex);
 	};
+
+	const sortAlphabetically = (a_aWords) => {
+		if (a_aWords === null)
+			return [];
+		else
+			return a_aWords.map(strWord => strWord.toLowerCase())
+						.sort((a, b) => a.localeCompare(b));
+	};
+
+	const getWordsMatchesArray = (a_aWords) => {
+		return a_aWords.reduce((aAcc, strWord, nInd, aArray) => {
+			if (nInd === 0 || strWord !== aArray[nInd - 1])
+				aAcc.push(1);
+			else
+				aAcc[aAcc.length - 1]++;
+
+			return aAcc;
+		}, []);
+	};
+	
+	const pTransformPartOne = new Transform({
+		transform(chunk, encoding, callback)
+		{
+			let strDataChunk 	= chunk.toString();
+			const aWords 		= getWordsArray(strDataChunk);
+			this.push(aWords.join(','));
+			callback();
+		}
+	})
+
+	const pTransformPartTwo = new Transform({
+		transform(chunk, encoding, callback)
+		{
+			let strDataChunk 	= chunk.toString();
+			const aWordsMatches = getWordsMatchesArray(sortAlphabetically(strDataChunk.split(",")));
+			this.push(`[${aWordsMatches.join(',')}]`);
+			callback();
+		}
+	})
+
+	const pReadableStream 	= fs.createReadStream(a_strFilePath, 'utf-8');
+	const strWriteFilePath  = path.join(path.dirname(a_strFilePath), 'wordsmatches.txt');
+	// Создание файла перед открытием потока на запись:
+	fs.open(strWriteFilePath, 'w', () => {});
+	const pWritableStream 	= fs.createWriteStream(strWriteFilePath);
+
+	pReadableStream
+		.pipe(pTransformPartOne)
+		.pipe(pTransformPartTwo)
+		.pipe(pWritableStream);
 };
 
-console.log(sum(2)(3)());
-
-// Объяснение:
-// Первый вызов sum в которую передали 2, вернул нам безымянную функцию, которую мы вызвали и в которую передали 3.
-// Т.к 3 не false безымянная функция вернула нам вызов sum в которую мы передали 2ку, из вызова sum, и 3ку из вызова безымянной функции.
-// В ответ sum вернула безыменняю функцию, которую мы вызвали не передав аргумента.
-// T.к. пришел false безымянная функция вернула нам a.
-// Переменная а существует в лексическом окружении функции sum и на момент последнего вызова безымянной функции равна 5.
-
-// Фактически мы можем отойти от каррирования и разложить вызовы по переменным:
-let noNameFun 	= sum(2);
-let sumCall 	= noNameFun(3);
-console.log(sumCall());
+module.exports = createFileOfWordsMatch;
