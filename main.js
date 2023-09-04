@@ -12,6 +12,7 @@
 const fs 			= require('node:fs');
 const { Transform } = require('node:stream');
 const path 			= require('node:path');
+const { log } = require('node:console');
 
 const createFileOfWordsMatch = (a_strFilePath) => {
 
@@ -38,24 +39,37 @@ const createFileOfWordsMatch = (a_strFilePath) => {
 			return aAcc;
 		}, []);
 	};
+	
+	const pTransformPartOne = new Transform({
+		transform(chunk, encoding, callback)
+		{
+			let strDataChunk 	= chunk.toString();
+			const aWords 		= getWordsArray(strDataChunk);
+			this.push(aWords.join(','));
+			callback();
+		}
+	})
+
+	const pTransformPartTwo = new Transform({
+		transform(chunk, encoding, callback)
+		{
+			let strDataChunk 	= chunk.toString();
+			const aWordsMatches = getWordsMatchesArray(sortAlphabetically(strDataChunk.split(",")));
+			this.push(`[${aWordsMatches.join(',')}]`);
+			callback();
+		}
+	})
 
 	const pReadableStream 	= fs.createReadStream(a_strFilePath, 'utf-8');
 	const strWriteFilePath  = path.join(path.dirname(a_strFilePath), 'wordsmatches.txt');
 	// Создание файла перед открытием потока на запись:
 	fs.open(strWriteFilePath, 'w', () => {});
 	const pWritableStream 	= fs.createWriteStream(strWriteFilePath);
-	const pTransformStream  = new Transform({
-		transform(chunk, encoding, callback) 
-		{
-			let strDataChunk 	= chunk.toString();
-			const aWords 		= getWordsArray(strDataChunk);
-			const aWordsMatches = getWordsMatchesArray(sortAlphabetically(aWords));
-			this.push(`[${aWordsMatches.join(',')}]`);
-			callback();
-		}
-	});
 
-	pReadableStream.pipe(pTransformStream).pipe(pWritableStream);
+	pReadableStream
+		.pipe(pTransformPartOne)
+		.pipe(pTransformPartTwo)
+		.pipe(pWritableStream);
 };
 
 
