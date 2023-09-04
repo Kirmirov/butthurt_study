@@ -12,7 +12,6 @@
 const fs 			= require('node:fs');
 const { Transform } = require('node:stream');
 const path 			= require('node:path');
-const { log } = require('node:console');
 
 const createFileOfWordsMatch = (a_strFilePath) => {
 
