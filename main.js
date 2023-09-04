@@ -72,7 +72,4 @@ const createFileOfWordsMatch = (a_strFilePath) => {
 		.pipe(pWritableStream);
 };
 
-
-
 module.exports = createFileOfWordsMatch;
-
