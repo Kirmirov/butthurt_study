@@ -6,8 +6,8 @@ customElements.define("my-list", class MyList extends LitElement {
 		display: flex;
 		justify-content: center;
 		align-items: center;
-		height: 80px;
-		width: 200px;
+		height: 60px;
+		width: 150px;
 		color: rgb(249 216 144);
 		background-color: rgb(58 189 73);
 		margin-left: 25px;
