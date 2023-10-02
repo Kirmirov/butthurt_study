@@ -1,6 +1,15 @@
-import { LitElement, html, property } from "lit-element";
+import { LitElement, html, css } from "lit-element";
 
 customElements.define("my-list", class MyList extends LitElement {
+	static styles = css`
+    p {
+		width: 300px;
+		color: white;
+		background-color: rgb(58 189 73);
+    }
+  `;
+
+
 	static get properties() {
 		return {
 			id: { type: Number },
@@ -8,11 +17,21 @@ customElements.define("my-list", class MyList extends LitElement {
 	}
 
 	render() {
-		return html`<li id="${this.id}">MyList id: ${this.id}</li>`;
+		return html`<p class="" id="${this.id}">MyList id: ${this.id}</p>`;
 	}
 });
 
 customElements.define("my-tree", class MyTree extends LitElement {
+	static styles = css`    
+    h3 {
+		color: green;
+		background-color: rgb(189 147 58);
+		width:200px
+    }
+	ul {
+		list-style-type: none;
+	}
+  `;
 	static get properties() {
 		return {
 			data: { type: Object },
@@ -34,20 +53,23 @@ customElements.define("my-tree", class MyTree extends LitElement {
 
 	render() {
 		return html`
-			<ul id="${this.data.id}">MyTree id: ${this.data.id}
-				${this.data.items && this.data.items.length
-				? html`${this.renderData(this.data.items)}`
-				: html`<my-list id="${this.data.id}"></my-list>`}
-			</ul>
+		<ul id="${this.data.id}">
+			<h3>MyTree id: ${this.data.id}</h3>
+			${this.renderData(this.data.items)}
+	  	</ul>
 		`;
 	}
 
 	renderData(items) {
-		return items.map(
-			(item) =>
-			  html`
-				<my-tree data='${JSON.stringify(item)}'></my-tree>
-			  `
-		  );
+		return items
+				? items.map(
+					(item) =>
+					html`${
+						item.items && item.items.length
+						? html`<my-tree data='${JSON.stringify(item)}'></my-tree>`
+						: html`<li><my-list id="${item.id}"></my-list></li>`
+					}`
+				)
+				: html``;
 	}
 });

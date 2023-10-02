@@ -3,7 +3,7 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Document</title>
+	<title>Custom Elements</title>
 </head>
 <body>
 	<my-tree data='{"id":1,
@@ -13,7 +13,15 @@
 								"id":11,
 								"items":
 								[
-									{"id":111}
+									{"id":111},
+									{"id":112, 
+									"items":
+										[
+											{"id":1121},
+											{"id":1122}
+										]
+									},
+									{"id":113}
 								]
 							},
 							{
@@ -22,8 +30,15 @@
 								[
 									{"id":121}
 								]
+							},
+							{
+								"id":13
+							},
+							{
+								"id":14
 							}
 						]
-					}'></my-tree>
+					}'>
+	</my-tree>
 </body>
 </html>
