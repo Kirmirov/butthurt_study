@@ -1,45 +1,81 @@
 /**
- *  Задача: Напишите функцию tree(), которая принимает в качестве аргумента иерархический объект со 
- * 	свойствами name, items и выводит структурированный вывод дерева в консоль.
+ *  Задача: Необходимо разработать функцию deepEqual, которая будет проводить глубокое сравнение между 
+ * переданными объектами a_pActual и a_pExpected. Под глубоким сравнением понимается то, что собственные
+ * свойства дочерних объектов также рекурсивно сравниваются. Если объекты не идентичны, вывести ошибку 
+ * с путем до неидентичного свойства 
  */
 
-const pMokeObject = {
-	"name": 1,
-	"items": 
-	[
-		{
-			"name": 2,
-			"items": 
-			[
-				{ "name": 3 }, 
-				{ "name": 4 }
-			]
-		}, 
-		{
-			"name": 5,
-			"items": [{ "name": 6 }]
-		}
-	]
-};
-
-const tree = (a_pObject, a_nLevel = 0, a_fIsLast = true, strIndent = "") => {
-
-	const strSplitter = a_nLevel > 0 ? (a_fIsLast ? "└── " : "├── ") : "";
-
-	console.log(`${strIndent}${strSplitter}${a_pObject.name}`);
-
-	if (a_pObject.hasOwnProperty('items') && Array.isArray(a_pObject.items)) 
-	{
-		for (let nInt = 0; nInt < a_pObject.items.length; nInt++) 
-		{
-			const fIsLastItem = nInt === a_pObject.items.length - 1;
-			const strNewIndent = a_nLevel > 0 ? (strIndent + (a_fIsLast ? "    " : "│   ")) : "";
-			tree(a_pObject.items[nInt], a_nLevel + 1, fIsLastItem, strNewIndent);
-		}
+const mokeObj1 = {
+	a: {
+		b: 1,
 	}
 };
+const mokeObj2 = {
+	a: {
+		b: 2,
+	}
+};
+const mokeObj3 = {
+	a: {
+		b: 1,
+	}
+};
+  
+const deepEqual = (a_pActual, a_pExpected, a_strPath = '$') => {
+    // Проверка на идентичность типов данных
+    if (typeof a_pActual !== typeof a_pExpected) 
+	{
+        console.error(`Type mismatch at ${a_strPath}: a_pExpected ${typeof a_pExpected}, got ${typeof a_pActual}`);
+        return false;
+    }
+    // Проверка на разные типы
+    if (a_pActual === null || a_pExpected === null) 
+	{
+        if (a_pActual !== a_pExpected) {
+            console.error(`Value mismatch at ${a_strPath}: a_pExpected ${a_pExpected}, got ${a_pActual}`);
+            return false;
+        }
+        return true;
+    }
+    // Проверка на итерируемые объекты (массивы и объекты)
+    if (typeof a_pActual === 'object' && a_pActual !== null && a_pExpected !== null) 
+	{
+        const keysA = Object.keys(a_pActual);
+        const keysE = Object.keys(a_pExpected);
 
-tree(pMokeObject);
-  
-  
+        // Проверка на одинаковое количество свойств
+        if (keysA.length !== keysE.length) 
+		{
+            console.error(`Property count mismatch at ${a_strPath}: a_pExpected ${keysE.length}, got ${keysA.length}`);
+            return false;
+        }
+
+        // Рекурсивная проверка свойств
+        for (const key of keysA) 
+		{
+            if (!keysE.includes(key)) 
+			{
+                console.error(`Property ${a_strPath}.${key} is missing in a_pExpected object`);
+                return false;
+            }
+
+            if (!deepEqual(a_pActual[key], a_pExpected[key], `${a_strPath}.${key}`))
+                return false;
+        }
+        return true;
+    }
+    // Простая проверка на равенство
+    if (a_pActual !== a_pExpected) 
+	{
+        console.error(`Value mismatch at ${a_strPath}: a_pExpected ${a_pExpected}, got ${a_pActual}`);
+        return false;
+    }
+
+    return true;
+};
+
+
+console.log(deepEqual(mokeObj1, mokeObj1));
+console.log(deepEqual(mokeObj1, mokeObj2));
+console.log(deepEqual(mokeObj1, mokeObj3));
 
