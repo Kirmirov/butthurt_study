@@ -1,29 +1,72 @@
-// Задание 1
-// Описание: Написать функцию sum, которая может быть исполнена любое количество раз с не undefined аргументом. 
-// Если она исполнена без аргументов, то возвращает значение суммы всех переданных до этого значений. 
-// sum(1)(2)(3)....(n)() === 1 + 2 + 3 + ... + n
+/**
+ *  Задача: Необходимо разработать функцию deepEqual, которая будет проводить глубокое сравнение между 
+ * переданными объектами a_pActual и a_pExpected. Под глубоким сравнением понимается то, что собственные
+ * свойства дочерних объектов также рекурсивно сравниваются. Если объекты не идентичны, вывести ошибку 
+ * с путем до неидентичного свойства 
+ */
 
+const mokeObj1 = {
+	a: {
+		b: 1,
+	}
+};
+const mokeObj2 = {
+	a: {
+		b: 2,
+	}
+};
+const mokeObj3 = {
+	a: {
+		b: 1,
+	}
+};
+  
+const deepEqual = (a_pActual, a_pExpected, a_strPath = '$') => {
+    // Проверка на идентичность типов данных
+    if (typeof a_pActual !== typeof a_pExpected) 
+	{
+        console.error(`Type mismatch at ${a_strPath}: a_pExpected ${typeof a_pExpected}, got ${typeof a_pActual}`);
+        return false;
+    }
+    // Проверка на итерируемые объекты (массивы и объекты)
+    if (typeof a_pActual === 'object' && a_pActual !== null && a_pExpected !== null) 
+	{
+        const keysA = Object.keys(a_pActual);
+        const keysE = Object.keys(a_pExpected);
 
-// Решение:
-let sum = function (a) {
-	return function (b) {
-		if (b) {
-		  	return sum(a + b);
-		}
-		return a; 
-	};
+        // Проверка на одинаковое количество свойств
+        if (keysA.length !== keysE.length) 
+		{
+            console.error(`Property count mismatch at ${a_strPath}: a_pExpected ${keysE.length}, got ${keysA.length}`);
+            return false;
+        }
+
+        // Рекурсивная проверка свойств
+        for (const key of keysA) 
+		{
+            if (!a_pExpected.hasOwnProperty(key)) 
+			{
+                console.error(`Property ${a_strPath}.${key} is missing in a_pExpected object`);
+                return false;
+            }
+
+            if (!deepEqual(a_pActual[key], a_pExpected[key], `${a_strPath}.${key}`))
+                return false;
+        }
+        return true;
+    }
+    // Простая проверка на равенство
+    if (a_pActual !== a_pExpected) 
+	{
+        console.error(`Value mismatch at ${a_strPath}: a_pExpected ${a_pExpected}, got ${a_pActual}`);
+        return false;
+    }
+
+    return true;
 };
 
-console.log(sum(2)(3)());
 
-// Объяснение:
-// Первый вызов sum в которую передали 2, вернул нам безымянную функцию, которую мы вызвали и в которую передали 3.
-// Т.к 3 не false безымянная функция вернула нам вызов sum в которую мы передали 2ку, из вызова sum, и 3ку из вызова безымянной функции.
-// В ответ sum вернула безыменняю функцию, которую мы вызвали не передав аргумента.
-// T.к. пришел false безымянная функция вернула нам a.
-// Переменная а существует в лексическом окружении функции sum и на момент последнего вызова безымянной функции равна 5.
+console.log(deepEqual(mokeObj1, mokeObj1));
+console.log(deepEqual(mokeObj1, mokeObj2));
+console.log(deepEqual(mokeObj1, mokeObj3));
 
-// Фактически мы можем отойти от каррирования и разложить вызовы по переменным:
-let noNameFun 	= sum(2);
-let sumCall 	= noNameFun(3);
-console.log(sumCall());
