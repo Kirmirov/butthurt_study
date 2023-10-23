@@ -1,72 +1,70 @@
 /**
- *  Задача: Необходимо разработать функцию deepEqual, которая будет проводить глубокое сравнение между 
- * переданными объектами a_pActual и a_pExpected. Под глубоким сравнением понимается то, что собственные
- * свойства дочерних объектов также рекурсивно сравниваются. Если объекты не идентичны, вывести ошибку 
- * с путем до неидентичного свойства 
+ * Задание :
+ * Написать NodeJS скрипт tree для вывода списка файлов и папок файловой системы.
+ * Результатом работы должен быть объект с массивами { files, folders }.
+ * Вызовы файловой системы должны быть асинхронными. Скрипт принимает входной параметр - путь до папки.
+ * Добавить возможность выполнять этот скрипт через команду npm run tree -- path.
  */
 
-const mokeObj1 = {
-	a: {
-		b: 1,
-	}
-};
-const mokeObj2 = {
-	a: {
-		b: 2,
-	}
-};
-const mokeObj3 = {
-	a: {
-		b: 1,
-	}
-};
-  
-const deepEqual = (a_pActual, a_pExpected, a_strPath = '$') => {
-    // Проверка на идентичность типов данных
-    if (typeof a_pActual !== typeof a_pExpected) 
-	{
-        console.error(`Type mismatch at ${a_strPath}: a_pExpected ${typeof a_pExpected}, got ${typeof a_pActual}`);
-        return false;
-    }
-    // Проверка на итерируемые объекты (массивы и объекты)
-    if (typeof a_pActual === 'object' && a_pActual !== null && a_pExpected !== null) 
-	{
-        const keysA = Object.keys(a_pActual);
-        const keysE = Object.keys(a_pExpected);
+const fs 	= require('fs/promises');
+const path 	= require('path');
 
-        // Проверка на одинаковое количество свойств
-        if (keysA.length !== keysE.length) 
+async function getTree(a_strPath) 
+{  
+	const TREE 				= { files: [], dirs: [] };
+	let strMainDirectory 	= '';
+
+	// Проверка переданного аргумента. Иначе выбрасываем ошибку:
+	try {
+		if ((await fs.stat(a_strPath)).isDirectory())
 		{
-            console.error(`Property count mismatch at ${a_strPath}: a_pExpected ${keysE.length}, got ${keysA.length}`);
-            return false;
-        }
+			strMainDirectory  = path.dirname(a_strPath);
 
-        // Рекурсивная проверка свойств
-        for (const key of keysA) 
-		{
-            if (!a_pExpected.hasOwnProperty(key)) 
-			{
-                console.error(`Property ${a_strPath}.${key} is missing in a_pExpected object`);
-                return false;
-            }
+			await walk(a_strPath);
+		}
+		else
+			return new Error('Unable to find a directory at the given path.');
+	} catch (err) {
+		if (err.code === 'ENOENT')
+			return new Error('The given path does not exist.');
+		else
+			return new Error("The given path is not a string.");
+	}
 
-            if (!deepEqual(a_pActual[key], a_pExpected[key], `${a_strPath}.${key}`))
-                return false;
-        }
-        return true;
-    }
-    // Простая проверка на равенство
-    if (a_pActual !== a_pExpected) 
+	async function walk(a_strCurentPath)
 	{
-        console.error(`Value mismatch at ${a_strPath}: a_pExpected ${a_pExpected}, got ${a_pActual}`);
-        return false;
-    }
+		// Записываем путь к папке в массив dirs:
+		TREE.dirs.push(path.relative(strMainDirectory, a_strCurentPath).replace(/\\/g, '/'));
+		// Получим ее содержимое:
+		let aDirectoryContent 	= await fs.readdir(a_strCurentPath);
+		// Обявляем массив для субдиректорий:
+		let aSubdirectories 	= [];
+		// Проходимся по содержимому папки:
+		for (const strFileName of aDirectoryContent) {
+			// Получаем полный путь до субдиректории:
+			let strFullPath = path.join(a_strCurentPath, strFileName);
+			// Заполняем массив субдиректорий, иначе добавляем путь к файлу в массив files:
+			if ((await fs.stat(strFullPath)).isDirectory())
+				aSubdirectories.push(strFullPath);
+			else 
+				TREE.files.push(path.relative(strMainDirectory, strFullPath).replace(/\\/g, '/'));
+		}
+		// Проходимся по массиву субдиректорий и перевызывем для них функцию walk:
+		for (const strSubdirPath of aSubdirectories)
+			await walk(strSubdirPath);
+	}
 
-    return true;
-};
+	return TREE;
+}
+
+if (process.argv[2])
+{
+	// Получение пути из агрумента переданного после команды tree -- 
+	const PATH_END = process.argv[2];
+	getTree(PATH_END);
+}
+else
+	process.exit(0);
 
 
-console.log(deepEqual(mokeObj1, mokeObj1));
-console.log(deepEqual(mokeObj1, mokeObj2));
-console.log(deepEqual(mokeObj1, mokeObj3));
-
+module.exports = getTree;
