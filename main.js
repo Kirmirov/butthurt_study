@@ -28,15 +28,6 @@ const deepEqual = (a_pActual, a_pExpected, a_strPath = '$') => {
         console.error(`Type mismatch at ${a_strPath}: a_pExpected ${typeof a_pExpected}, got ${typeof a_pActual}`);
         return false;
     }
-    // Проверка на разные типы
-    if (a_pActual === null || a_pExpected === null) 
-	{
-        if (a_pActual !== a_pExpected) {
-            console.error(`Value mismatch at ${a_strPath}: a_pExpected ${a_pExpected}, got ${a_pActual}`);
-            return false;
-        }
-        return true;
-    }
     // Проверка на итерируемые объекты (массивы и объекты)
     if (typeof a_pActual === 'object' && a_pActual !== null && a_pExpected !== null) 
 	{
@@ -53,7 +44,7 @@ const deepEqual = (a_pActual, a_pExpected, a_strPath = '$') => {
         // Рекурсивная проверка свойств
         for (const key of keysA) 
 		{
-            if (!keysE.includes(key)) 
+            if (!a_pExpected.hasOwnProperty(key)) 
 			{
                 console.error(`Property ${a_strPath}.${key} is missing in a_pExpected object`);
                 return false;
