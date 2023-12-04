@@ -28,7 +28,7 @@ const tree = async () => {
 			if (pFileStat.isDirectory() && nDepth > 0) 
 			{
 				console.log(`${'  '.repeat(nDepth - 1)}|-- ${strFileName}/`);
-				await generateTree(strFilePath, nDepth - 1);
+				await createTree(strFilePath, nDepth - 1);
 			} 
 			else
 				console.log(`${'  '.repeat(nDepth)}|-- ${strFileName}`);
